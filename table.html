@@ -1,0 +1,107 @@
+<html>
+
+<head>
+
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"
+        integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous">
+        </script>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+</head>
+
+<style>
+    .padrao {
+        background-color: rgba(0, 0, 0, 0.9);
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 80px;
+        border-radius: 20px;
+        color: #fff;
+
+    }
+
+    input {
+        padding: 15px;
+        border: none;
+        outline: none;
+        font-size: 15px;
+        margin-bottom: 20px;
+        width: 100%;
+        border-radius: 10px;
+    }
+
+    #button {
+        background-color: rgb(76, 157, 238);
+        border: none;
+        padding: 15px;
+        width: 100%;
+        border-radius: 20px;
+        color: #fff;
+    }
+
+    h1 {
+        text-align: center;
+        color: rgb(76, 157, 238);
+    }
+</style>
+
+<body>
+
+    <div id=cad class="padrao">
+        <h1>CADASTRAR</h1>
+        <br />
+        <br />
+
+        <form action="/web2/cadastro" method="post" data-response="cadastro">
+
+            <input type="text" placeholder="Nome" name="name" />
+
+            <input type="text" placeholder="Idade" name="idade" />
+
+            <input type="text" placeholder="CPF" name="cpf" />
+
+            <input type="password" placeholder="Senha" name="pass" />
+
+            <input id="button" type="submit" />
+
+            <div id="resposta">
+
+            </div>
+        </form>
+    </div>
+
+    <script>
+
+        function cadastro(msg) {
+
+            var obj = JSON.parse(msg);
+
+            var html = '';
+
+            $("#resposta").html(msg);
+
+        }
+
+
+        $("form").on("submit", function (e) {
+            e.preventDefault();
+            var resposta = $(this).attr("data-response");
+            $.ajax({
+                url: $(this).attr("action"),
+                method: $(this).attr("method"),
+                data: $(this).serialize(),
+                success: function (msg) {
+                    eval(resposta + "(msg);");
+
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

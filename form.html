@@ -1,0 +1,248 @@
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"
+        integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+</head>
+<style>
+    .padrao {
+        background-color: rgba(0, 0, 0, 0.9);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 80px;
+        border-radius: 20px;
+        color: #fff;
+
+    }
+
+    .caixa {
+        padding: 15px;
+        border: none;
+        outline: none;
+        font-size: 15px;
+        margin-bottom: 20px;
+        width: 100%;
+    }
+
+    .caixaCad {
+        background-color: rgba(0, 0, 0, 0.9);
+        padding: 15px;
+        border: none;
+        outline: none;
+        font-size: 15px;
+        margin-bottom: 20px;
+        width: 50%;
+        border-radius: 10px;
+        margin-left: 20%;
+        color: rgb(255, 255, 255)
+    }
+
+    #buttonCad {
+        background-color: rgb(76, 157, 238);
+        border: none;
+        padding: 15px;
+        width: 50%;
+        border-radius: 10px;
+        color: #fff;
+    }
+
+    #button {
+        background-color: rgb(76, 157, 238);
+        border: none;
+        padding: 15px;
+        width: 100%;
+        border-radius: 10px;
+        color: #fff;
+    }
+
+    #formcad {
+        margin-top: 10px;
+    }
+</style>
+
+
+<body>
+    <!-- Login -->
+    <main id="respostaLogin">
+        <div class="padrao">
+            <h1> Login </h1>
+
+            <form action="/web2/login" method="post" data-response="login">
+
+                <input class="caixa" type="text" placeholder="Nome" name="user" />
+
+                <input class="caixa" type="password" placeholder="Senha" name="pass" />
+
+                <input class="caixa" id="button" type="submit" />
+
+                <div>
+
+                </div>
+            </form>
+        </div>
+    </main>
+    <!-- Login -->
+
+    <!-- Tabela view -->
+    <div class="container">
+
+        <table id="resultDados" class='table table-striped table-bordered table-condensed table-hover'>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Idade</th>
+                    <th>CPF</th>
+                    <th>Senha</th>
+                    <th>Deletar</th>
+                </tr>
+            </thead>
+            <tbody id="tabela">
+
+            </tbody>
+        </table>
+    </div>
+    <!-- Tabela view -->
+
+    <!-- CADASTRAR  -->
+
+    <main class="card">
+        <form id="formcad" action="/web2/cadastro" method="post" data-response="cadastro">
+
+            <input class="caixaCad" type="text" placeholder="Nome" name="name" />
+
+            <input class="caixaCad" type="text" placeholder="Idade" name="idade" />
+
+            <input class="caixaCad" type="text" placeholder="CPF" name="cpf" />
+
+            <input class="caixaCad" type="password" placeholder="Senha" name="pass" />
+
+            <input class="caixaCad" id="buttonCad" type="submit" />
+
+            <div id="resposta">
+
+            </div>
+        </form>
+    </main>
+
+    <!-- CADASTRAR -->
+
+    <script>
+        $("#resultDados").hide();
+        $(".card").hide();
+
+
+        function listar(dados) {
+
+            const tab = document.getElementById("tabela");
+
+            tab.innerText = ''
+
+            for (let i = 0; i < dados.length; i++) {
+                let tr = tab.insertRow();
+                let td_nome = tr.insertCell();
+                let td_idade = tr.insertCell();
+                let td_cpf = tr.insertCell();
+                let td_senha = tr.insertCell();
+                let td_botao = tr.insertCell();
+
+
+
+                td_nome.innerText = dados[i].nome;
+                td_idade.innerText = dados[i].idade;
+                td_cpf.innerText = dados[i].cpf;
+                td_senha.innerText = dados[i].senha;
+
+                let btn_apagar = document.createElement('img');
+
+                btn_apagar.src = 'deletar.png'
+
+                btn_apagar.setAttribute("onclick", "deletar('" + dados[i].nome + "')");
+
+                td_botao.appendChild(btn_apagar);
+
+            }
+
+        }
+
+        function login(msg) {
+
+            console.log(msg)
+            var obj = JSON.parse(msg);
+
+            if (obj.mensagem == "ok") {
+                $("#respostaLogin").hide();
+                $("#resultDados").show();
+                $(".card").show();
+                return listar(obj.dados)
+            }
+        }
+
+        function cadastro(cad) {
+
+            var obj = JSON.parse(cad);
+
+            if (obj.mensagem == "inserido com sucesso") {
+                $('#formcad').each(function () {
+                    this.reset();
+                });
+
+                return listar(obj.dados)
+            } else {
+                console.log("Erro ao tentar cadastrar")
+
+            }
+
+        }
+
+        function deletar(nome) {
+            $.ajax({
+                url: 'http://localhost/web2/user/' + nome,
+                type: 'DELETE',
+                success: function (result) {
+                    var obj = JSON.parse(result);
+                    if (obj.mensagem == "Deletado") {
+                        return listar(obj.dados) //se deu tudo certo lista os que sobraram
+                    }
+                }
+            });
+        }
+
+
+        $("form").on("submit", function (e) {
+            e.preventDefault();
+            var resposta = $(this).attr("data-response");
+            $.ajax({
+                url: $(this).attr("action"),
+                method: $(this).attr("method"),
+                data: $(this).serialize(),
+                success: function (msg) {
+                    eval(resposta + "(msg);");
+
+                }
+            });
+        });
+
+        $("formcad").on("submit", function (c) {
+            c.preventDefault();
+            var resposta = $(this).attr("data-response");
+            $.ajax({
+                url: $(this).attr("action"),
+                method: $(this).attr("method"),
+                data: $(this).serialize(),
+                success: function (msg) {
+                    eval(resposta + "(msg);");
+                    console.log(msg, e)
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
